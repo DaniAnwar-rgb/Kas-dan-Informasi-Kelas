@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kas Kelas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --bg: #EAF4FF;
+    --bg2: #DCEEFF;
+    --ink: #2D3B55;
+    --ink-soft: #6B7A99;
+    --coral: #FF6F59;
+    --mint: #2FA875;
+    --sun: #F2A93B;
+    --purple: #8B6BD8;
+    --card: #FFFFFF;
+    --line: #D9E6F5;
+    --shadow: 0 3px 0 rgba(45,59,85,0.08);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% 8%, #FFE8CC 0%, transparent 32%),
+      radial-gradient(circle at 90% 4%, #D7F5E4 0%, transparent 28%),
+      var(--bg);
+    color: var(--ink);
+    font-family:'Nunito', sans-serif;
+    min-height:100vh;
+    padding-bottom:60px;
+  }
+  .wrap{max-width:760px; margin:0 auto; padding: 18px 16px 40px;}
+
+  header.app-header{
+    background: var(--card);
+    border-radius:20px;
+    border:2px solid var(--line);
+    box-shadow: var(--shadow);
+    padding:16px 18px;
+    margin-bottom:16px;
+    display:flex; justify-content:space-between; align-items:center; gap:12px;
+  }
+  header.app-header .title-block h1{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:24px;
+    margin:0 0 2px;
+    color:var(--ink);
+  }
+  header.app-header .title-block .sub{
+    font-size:12px;
+    color:var(--ink-soft);
+    font-weight:600;
+  }
+
+  .mode-btn{
+    font-family:'Nunito', sans-serif;
+    font-weight:700;
+    font-size:12px;
+    border:2px solid var(--purple);
+    background: #F3EEFF;
+    color: var(--purple);
+    padding:8px 14px;
+    border-radius:999px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .mode-btn.active{ background: var(--purple); color:#fff; }
+
+  nav.tabs{
+    display:flex; gap:8px; margin-bottom:16px;
+    overflow-x:auto;
+  }
+  nav.tabs button{
+    flex:1;
+    font-family:'Baloo 2', sans-serif;
+    font-size:14px;
+    background: var(--card);
+    border:2px solid var(--line);
+    color: var(--ink-soft);
+    padding:10px 8px;
+    cursor:pointer;
+    border-radius:14px;
+    white-space:nowrap;
+  }
+  nav.tabs button.active{
+    background: var(--sun);
+    color: #fff;
+    border-color: var(--sun);
+  }
+
+  .card{
+    background: var(--card);
+    border:2px solid var(--line);
+    border-radius:18px;
+    box-shadow: var(--shadow);
+    padding:18px;
+    margin-bottom:14px;
+  }
+  .card h2, .card h3{ font-family:'Baloo 2', sans-serif; margin-top:0; color:var(--ink); }
+  .muted{ color:var(--ink-soft); font-size:13px; }
+
+  .summary-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px;}
+  .summary-grid .stat{ background:var(--bg2); border-radius:14px; padding:12px 8px; text-align:center;}
+  .summary-grid .stat .num{ font-family:'Baloo 2',sans-serif; font-weight:700; font-size:17px; color:var(--ink);}
+  .summary-grid .stat .lbl{ font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.03em; color:var(--ink-soft); margin-top:2px;}
+
+  select, input[type=text], input[type=number], input[type=date], input[type=time], textarea{
+    font-family:'Nunito', sans-serif;
+    border:2px solid var(--line);
+    background:#fff;
+    border-radius:12px;
+    padding:9px 12px;
+    font-size:14px;
+    width:100%;
+    color:var(--ink);
+  }
+  textarea{ resize:vertical; min-height:60px; }
+  label.field-label{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.03em; color:var(--ink-soft); display:block; margin-bottom:4px; }
+  .field{ margin-bottom:10px; }
+
+  .btn{
+    font-family:'Baloo 2', sans-serif;
+    font-size:14px;
+    border:none;
+    background: var(--mint);
+    color:#fff;
+    padding:10px 18px;
+    border-radius:999px;
+    cursor:pointer;
+  }
+  .btn.secondary{ background: var(--bg2); color:var(--ink); }
+  .btn.danger{ background:var(--coral); }
+  .btn:disabled{ opacity:0.4; cursor:not-allowed; }
+  .btn-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+
+  .member-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 4px; border-bottom:1px solid var(--line);
+    gap:10px;
+  }
+  .member-row:last-child{ border-bottom:none; }
+  .member-name{ font-weight:700; }
+
+  .badge{
+    display:inline-flex; align-items:center; gap:5px;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:600;
+    font-size:12px;
+    padding:6px 12px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .badge.lunas{ background:#E1F6EC; color:var(--mint); }
+  .badge.belum{ background:#FFF1E0; color:var(--sun); }
+
+  .toggle-pay{ border:none; background:none; cursor:pointer; padding:0; }
+
+  .item-card{ border-bottom:1px solid var(--line); padding:12px 4px; }
+  .item-card:last-child{ border-bottom:none; }
+  .item-title{ font-weight:700; margin:0 0 3px; font-family:'Baloo 2',sans-serif; font-size:15px;}
+  .item-meta{ font-size:11px; font-weight:700; color:var(--purple); text-transform:uppercase; letter-spacing:0.03em; margin-bottom:6px;}
+  .item-desc{ font-size:14px; line-height:1.5; white-space:pre-wrap; color:var(--ink);}
+  .item-actions{ margin-top:6px; }
+  .item-actions a{ font-size:12px; color:var(--coral); cursor:pointer; font-weight:700; }
+
+  .empty-state{ text-align:center; padding:34px 10px; color:var(--ink-soft); font-size:14px; }
+  .empty-state .big{ font-family:'Baloo 2',sans-serif; font-size:17px; margin-bottom:4px; color:var(--ink);}
+
+  .task-done .item-title{ text-decoration:line-through; color:var(--ink-soft); }
+  .checkbox-row{ display:flex; align-items:flex-start; gap:10px; }
+  .checkbox-row input[type=checkbox]{ width:20px; height:20px; margin-top:2px; accent-color:var(--mint); }
+
+  .modal-bg{
+    position:fixed; inset:0; background:rgba(45,59,85,0.5);
+    display:flex; align-items:center; justify-content:center; z-index:50; padding:20px;
+  }
+  .modal{
+    background:var(--card); border-radius:20px; padding:22px; max-width:340px; width:100%;
+    border:2px solid var(--line);
+  }
+  .modal h3{ font-family:'Baloo 2',sans-serif; margin-top:0; }
+  .hidden{ display:none !important; }
+
+  .toast{
+    position:fixed; bottom:16px; left:50%; transform:translateX(-50%);
+    background:var(--ink); color:#fff; padding:10px 18px; border-radius:999px;
+    font-weight:700; font-size:12px; z-index:60;
+    opacity:0; transition:opacity 0.25s;
+  }
+  .toast.show{ opacity:1; }
+
+  .add-form{ border-top:2px dashed var(--line); margin-top:14px; padding-top:14px; }
+  .loading{ text-align:center; padding:60px 10px; color:var(--ink-soft); font-weight:700; font-size:14px;}
+
+  @media (max-width:480px){
+    .summary-grid{ grid-template-columns:1fr 1fr; }
+    header.app-header{ flex-wrap:wrap; }
+  }
+
+  .history-btn{
+    border:none; background:var(--bg2); color:var(--purple);
+    font-size:11px; font-weight:700; padding:5px 10px; border-radius:999px;
+    cursor:pointer; margin-left:8px; white-space:nowrap;
+  }
+  .modal.wide{ max-width:420px; }
+  .history-table{ width:100%; border-collapse:collapse; margin-top:10px; }
+  .history-table th, .history-table td{ text-align:left; padding:7px 6px; border-bottom:1px solid var(--line); font-size:13px; }
+  .history-table th{ font-family:'Baloo 2',sans-serif; color:var(--ink-soft); font-size:11px; text-transform:uppercase; }
+  .history-summary{ display:flex; gap:8px; margin:10px 0; }
+  .history-summary .chip{ background:var(--bg2); border-radius:10px; padding:6px 10px; font-size:12px; font-weight:700; flex:1; text-align:center; }
+
+  .filter-row{ margin-bottom:12px; }
+
+  .export-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  .export-row .btn{ font-size:12px; padding:8px 14px; }
+  .export-row .btn.excel{ background:#1D8348; }
+  .export-row .btn.pdf{ background:var(--coral); }
+
+  #printArea{ display:none; }
+  @media print{
+    body *{ visibility:hidden; }
+    #printArea, #printArea *{ visibility:visible; }
+    #printArea{ display:block; position:absolute; top:0; left:0; width:100%; padding:20px; }
+    #printArea h2{ font-family:'Baloo 2',sans-serif; }
+    #printArea table{ width:100%; border-collapse:collapse; margin-top:10px; }
+    #printArea th, #printArea td{ border:1px solid #999; padding:6px 8px; text-align:left; font-size:13px; }
+  }
+
+  .month-nav{ display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+  .month-nav button{ border:none; background:var(--bg2); color:var(--ink); border-radius:999px; width:34px; height:34px; cursor:pointer; font-size:15px; flex-shrink:0; }
+  .month-nav .lbl{ flex:1; text-align:center; font-family:'Baloo 2',sans-serif; font-weight:700; font-size:15px; }
+
+  .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:14px; }
+  .cal-head{ font-size:10px; font-weight:700; text-align:center; color:var(--ink-soft); text-transform:uppercase; padding-bottom:4px; }
+  .cal-cell{ min-height:52px; border-radius:8px; background:var(--bg2); font-size:10px; padding:4px 3px; display:flex; flex-direction:column; gap:2px; }
+  .cal-cell.empty{ background:transparent; }
+  .cal-cell.today{ outline:2px solid var(--purple); }
+  .cal-cell .daynum{ font-weight:700; font-size:11px; color:var(--ink); }
+  .cal-cell.has-event{ background:#FFE9C6; }
+  .cal-cell .evt-tag{ font-size:8px; line-height:1.2; background:var(--sun); color:#fff; border-radius:4px; padding:1px 3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  .view-toggle{ display:flex; gap:8px; margin-bottom:12px; }
+  .view-toggle button{ flex:1; }
+
+  .kas-table-wrap{ overflow-x:auto; margin-top:6px; -webkit-overflow-scrolling:touch; }
+  .kas-table{ border-collapse:collapse; width:100%; min-width:460px; }
+  .kas-table th, .kas-table td{ border:1px solid var(--line); padding:7px 8px; font-size:12px; text-align:center; }
+  .kas-table th{ background:var(--bg2); font-family:'Baloo 2',sans-serif; font-size:11px; }
+  .kas-table td:nth-child(2), .kas-table th:nth-child(2){ text-align:left; white-space:nowrap; font-weight:600; }
+  .kas-table input[type=checkbox]{ width:18px; height:18px; accent-color:var(--mint); }
+  .add-month-row{ display:flex; gap:8px; margin-top:10px; align-items:flex-end; }
+  .add-month-row .field{ flex:1; margin-bottom:0; }
+
+  .expense-row{ display:flex; justify-content:space-between; align-items:center; padding:9px 2px; border-bottom:1px solid var(--line); gap:8px; }
+  .expense-row:last-child{ border-bottom:none; }
+  .expense-name{ font-weight:700; font-size:13px; }
+  .expense-date{ font-size:11px; color:var(--ink-soft); }
+  .expense-amount{ font-family:'Baloo 2',sans-serif; font-weight:700; color:var(--coral); white-space:nowrap; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="app-header">
+    <div class="title-block">
+      <h1 id="className">Kas Kelas</h1>
+      <div class="sub" id="dateNow"></div>
+    </div>
+    <button class="mode-btn" id="modeBtn">Mode: Umum</button>
+  </header>
+
+  <nav class="tabs">
+    <button data-tab="kas" class="active">💰 Kas</button>
+    <button data-tab="pengumuman">📣 Info</button>
+    <button data-tab="agenda">📅 Agenda</button>
+    <button data-tab="tugas">📝 Tugas/PR</button>
+  </nav>
+
+  <div id="content"><div class="loading">Membuka kas kelas… 🎒</div></div>
+</div>
+
+<div id="toast" class="toast"></div>
+<div id="printArea"></div>
+
+<script>
+const MONTH_NAMES = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+const MONTH_SHORT = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+
+let state = {
+  config: { className: "Kelas 3A", nominal: 5000, pin: "1234", members: [] },
+  kasData: {},
+  pengumuman: [],
+  agenda: [],
+  tugas: [],
+  pengeluaran: []
+};
+let isAdmin = false;
+let activeTab = 'kas';
+let selectedMonth = monthKey(new Date());
+let selectedMapel = 'Semua';
+let kasView = 'bulanan';
+let selectedAgendaMonth = monthKey(new Date());
+
+function monthKey(d){ return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,'0'); }
+function monthLabel(key){ const [y,m]=key.split('-'); return MONTH_NAMES[parseInt(m,10)-1] + " " + y; }
+function monthShortLabel(key){ const [y,m]=key.split('-'); return MONTH_SHORT[parseInt(m,10)-1] + " " + y.slice(2); }
+function shiftMonth(key, delta){
+  const [y,m] = key.split('-').map(Number);
+  const d = new Date(y, m-1+delta, 1);
+  return monthKey(d);
+}
+function rupiah(n){ return "Rp " + Number(n||0).toLocaleString('id-ID'); }
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+async function storageGet(key, fallback){
+  try{
+    const res = await window.storage.get(key, true);
+    if(!res || res.value === undefined) return fallback;
+    return JSON.parse(res.value);
+  }catch(e){ return fallback; }
+}
+async function storageSet(key, value){
+  try{
+    const res = await window.storage.set(key, JSON.stringify(value), true);
+    if(!res){ showToast('Gagal menyimpan'); return false; }
+    return true;
+  }catch(e){ showToast('Gagal menyimpan'); return false; }
+}
+
+async function loadAll(){
+  const [config, kasData, pengumuman, agenda, tugas, pengeluaran] = await Promise.all([
+    storageGet('config', state.config),
+    storageGet('kas-data', {}),
+    storageGet('pengumuman', []),
+    storageGet('agenda', []),
+    storageGet('tugas', []),
+    storageGet('pengeluaran', [])
+  ]);
+  state.config = config;
+  state.kasData = kasData;
+  state.pengumuman = pengumuman;
+  state.agenda = agenda;
+  state.tugas = tugas;
+  state.pengeluaran = pengeluaran;
+}
+
+/* ---------- ADMIN MODE ---------- */
+function openAdminGate(){
+  const bg = document.createElement('div');
+  bg.className = 'modal-bg';
+  bg.innerHTML = `
+    <div class="modal">
+      <h3>Masuk sebagai Wali Kelas / Guru</h3>
+      <div class="field">
+        <label class="field-label">Masukkan PIN</label>
+        <input type="text" id="pinInput" inputmode="numeric" placeholder="••••">
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="pinSubmit">Masuk</button>
+        <button class="btn secondary" id="pinCancel">Batal</button>
+      </div>
+      <p class="muted" style="margin-top:10px; font-size:11px;">PIN awal: 1234 (bisa diganti setelah masuk, di tab Kas).</p>
+    </div>`;
+  document.body.appendChild(bg);
+  document.getElementById('pinCancel').onclick = () => bg.remove();
+  document.getElementById('pinSubmit').onclick = () => {
+    const val = document.getElementById('pinInput').value;
+    if(val === (state.config.pin || '1234')){
+      isAdmin = true;
+      bg.remove();
+      updateModeBtn();
+      render();
+      showToast('Mode Guru aktif ✅');
+    }else{
+      showToast('PIN salah');
+    }
+  };
+  document.getElementById('pinInput').focus();
+}
+function updateModeBtn(){
+  const btn = document.getElementById('modeBtn');
+  btn.textContent = isAdmin ? 'Mode: Guru (keluar)' : 'Mode: Umum';
+  btn.classList.toggle('active', isAdmin);
+}
+document.getElementById('modeBtn').onclick = () => {
+  if(isAdmin){ isAdmin=false; updateModeBtn(); render(); showToast('Kembali ke mode umum'); }
+  else openAdminGate();
+};
+
+/* ---------- TABS ---------- */
+document.querySelectorAll('nav.tabs button').forEach(btn=>{
+  btn.onclick = () => {
+    activeTab = btn.dataset.tab;
+    document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('active', b===btn));
+    render();
+  };
+});
+
+function render(){
+  document.getElementById('className').textContent = state.config.className || 'Kas Kelas';
+  document.getElementById('dateNow').textContent = new Date().toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  const el = document.getElementById('content');
+  if(activeTab==='kas') el.innerHTML = renderKas();
+  else if(activeTab==='pengumuman') el.innerHTML = renderPengumuman();
+  else if(activeTab==='agenda') el.innerHTML = renderAgenda();
+  else if(activeTab==='tugas') el.innerHTML = renderTugas();
+  bindTabEvents();
+}
+
+/* ---------- KAS TAB ---------- */
+function computeTotals(){
+  let totalMasuk = 0;
+  Object.values(state.kasData).forEach(monthData => {
+    Object.values(monthData || {}).forEach(entry => {
+      if(entry && entry.paid) totalMasuk += (entry.amount || state.config.nominal || 0);
+    });
+  });
+  const totalPengeluaran = (state.pengeluaran||[]).reduce((s,p)=> s + (p.amount||0), 0);
+  return { totalMasuk, totalPengeluaran, sisaSaldo: totalMasuk - totalPengeluaran };
+}
+
+function renderKas(){
+  const months = Object.keys(state.kasData);
+  if(!months.includes(selectedMonth)) months.push(selectedMonth);
+  months.sort();
+  const monthOptions = months.map(m => `<option value="${m}" ${m===selectedMonth?'selected':''}>${monthLabel(m)}</option>`).join('');
+
+  const monthData = state.kasData[selectedMonth] || {};
+  const members = state.config.members || [];
+  const paidCount = members.filter(m => monthData[m.id] && monthData[m.id].paid).length;
+  const total = paidCount * (state.config.nominal || 0);
+  const { totalMasuk, totalPengeluaran, sisaSaldo } = computeTotals();
+
+  let bodyHtml = '';
+  if(kasView === 'tabel'){
+    bodyHtml = renderKasTable(months, members);
+  }else{
+    let rows = '';
+    if(members.length === 0){
+      rows = `<div class="empty-state"><div class="big">Belum ada nama siswa 🧒</div>${isAdmin ? 'Tambahkan nama siswa di bawah ya.' : 'Guru belum menambahkan daftar siswa.'}</div>`;
+    }else{
+      rows = members.map(m => {
+        const d = monthData[m.id] || {paid:false};
+        const badgeHtml = d.paid ? `<span class="badge lunas">✅ Sudah Bayar</span>` : `<span class="badge belum">⏳ Belum Bayar</span>`;
+        const toggle = isAdmin
+          ? `<button class="toggle-pay" data-member="${m.id}" title="Ubah status">${badgeHtml}</button>`
+          : badgeHtml;
+        const delBtn = isAdmin ? `<a class="del-member" data-id="${m.id}" style="margin-left:10px;color:var(--coral);font-size:11px;font-weight:700;cursor:pointer;">hapus</a>` : '';
+        return `<div class="member-row">
+          <span class="member-name">${escapeHtml(m.name)}${delBtn}</span>
+          <span style="display:flex;align-items:center;">
+            ${toggle}
+            <button class="history-btn" data-member="${m.id}" data-name="${escapeHtml(m.name)}">🕒 Riwayat</button>
+          </span>
+        </div>`;
+      }).join('');
+    }
+    bodyHtml = `
+      <div class="field">
+        <label class="field-label">Bulan</label>
+        <select id="monthSelect">${monthOptions}</select>
+      </div>
+      <div class="summary-grid">
+        <div class="stat"><div class="num">${rupiah(state.config.nominal)}</div><div class="lbl">Kas / Bulan</div></div>
+        <div class="stat"><div class="num">${paidCount}/${members.length}</div><div class="lbl">Sudah Bayar</div></div>
+        <div class="stat"><div class="num">${rupiah(total)}</div><div class="lbl">Terkumpul</div></div>
+      </div>
+      ${rows}`;
+  }
+
+  const pengeluaranList = [...state.pengeluaran].sort((a,b)=> b.date.localeCompare(a.date));
+  const pengeluaranItems = pengeluaranList.length === 0
+    ? `<div class="empty-state" style="padding:16px 10px;"><div class="big" style="font-size:14px;">Belum ada pengeluaran 🧾</div></div>`
+    : pengeluaranList.map(p => `
+      <div class="expense-row">
+        <div>
+          <div class="expense-name">${escapeHtml(p.title)}</div>
+          <div class="expense-date">${formatDate(p.date)}${p.note ? ' · ' + escapeHtml(p.note) : ''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="expense-amount">-${rupiah(p.amount)}</span>
+          ${isAdmin ? `<a class="del-item" data-list="pengeluaran" data-id="${p.id}" style="font-size:11px;color:var(--coral);font-weight:700;cursor:pointer;">hapus</a>` : ''}
+        </div>
+      </div>`).join('');
+
+  const pengeluaranForm = isAdmin ? `
+    <div class="add-form">
+      <label class="field-label">Catat Pengeluaran Baru</label>
+      <div class="field"><input type="text" id="expenseTitle" placeholder="Contoh: Beli spidol & kertas"></div>
+      <div style="display:flex; gap:10px;">
+        <div class="field" style="flex:1;"><label class="field-label">Jumlah (Rp)</label><input type="number" id="expenseAmount" placeholder="0"></div>
+        <div class="field" style="flex:1;"><label class="field-label">Tanggal</label><input type="date" id="expenseDate" value="${new Date().toISOString().slice(0,10)}"></div>
+      </div>
+      <button class="btn danger" id="addExpenseBtn">+ Tambah Pengeluaran</button>
+    </div>` : '';
+
+  const adminPanel = isAdmin ? `
+    <div class="card">
+      <h3>Pengaturan Guru / Wali Kelas</h3>
+      <div class="field">
+        <label class="field-label">Nama Kelas</label>
+        <input type="text" id="classNameInput" value="${escapeHtml(state.config.className)}">
+      </div>
+      <div class="field">
+        <label class="field-label">Kas per Bulan</label>
+        <input type="number" id="nominalInput" value="${state.config.nominal}">
+      </div>
+      <div class="field">
+        <label class="field-label">Ganti PIN</label>
+        <input type="text" id="pinChangeInput" value="${escapeHtml(state.config.pin)}">
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="saveConfigBtn">Simpan</button>
+      </div>
+      <div class="add-form">
+        <label class="field-label">Tambah Nama Siswa</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="newMemberName" placeholder="Nama siswa">
+          <button class="btn secondary" id="addMemberBtn" style="white-space:nowrap;">+ Tambah</button>
+        </div>
+      </div>
+      <div class="add-form">
+        <button class="btn danger" id="resetDataBtn">Hapus Semua Data</button>
+      </div>
+    </div>` : '';
+
+  return `
+    <div class="card">
+      <div class="summary-grid">
+        <div class="stat"><div class="num">${rupiah(totalMasuk)}</div><div class="lbl">💚 Total Masuk</div></div>
+        <div class="stat"><div class="num">${rupiah(totalPengeluaran)}</div><div class="lbl">🧾 Pengeluaran</div></div>
+        <div class="stat"><div class="num">${rupiah(sisaSaldo)}</div><div class="lbl">💰 Sisa Saldo</div></div>
+      </div>
+      <div class="view-toggle">
+        <button class="btn ${kasView==='bulanan'?'':'secondary'}" id="viewBulananBtn">📅 Per Bulan</button>
+        <button class="btn ${kasView==='tabel'?'':'secondary'}" id="viewTabelBtn">📋 Tabel Semua Bulan</button>
+      </div>
+      ${bodyHtml}
+      <div class="export-row">
+        <button class="btn excel" id="exportExcelBtn">⬇️ Ekspor Excel</button>
+        <button class="btn pdf" id="exportPdfBtn">🖨️ Cetak / PDF</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Pengeluaran Kas</h3>
+      ${pengeluaranItems}
+      ${pengeluaranForm}
+    </div>
+    ${adminPanel}
+  `;
+}
+
+function renderKasTable(months, members){
+  if(members.length === 0){
+    return `<div class="empty-state"><div class="big">Belum ada nama siswa 🧒</div>${isAdmin ? 'Tambahkan nama siswa di bawah ya.' : 'Guru belum menambahkan daftar siswa.'}</div>`;
+  }
+  const head = `<tr><th>No</th><th>Nama Siswa</th>${months.map(mk=>`<th>${monthShortLabel(mk)}</th>`).join('')}</tr>`;
+  const body = members.map((m,i) => {
+    const cells = months.map(mk => {
+      const d = (state.kasData[mk]||{})[m.id] || {paid:false};
+      return `<td><input type="checkbox" class="table-toggle" data-month="${mk}" data-member="${m.id}" ${d.paid?'checked':''} ${isAdmin?'':'disabled'}></td>`;
+    }).join('');
+    return `<tr><td>${i+1}</td><td>${escapeHtml(m.name)}</td>${cells}</tr>`;
+  }).join('');
+  const addMonthRow = isAdmin ? `
+    <div class="add-month-row">
+      <div class="field">
+        <label class="field-label">Tambah Kolom Bulan</label>
+        <input type="month" id="newMonthInput" value="${selectedMonth}">
+      </div>
+      <button class="btn secondary" id="addMonthBtn" style="white-space:nowrap;">+ Tambah Bulan</button>
+    </div>` : '';
+  return `
+    <div class="kas-table-wrap">
+      <table class="kas-table">
+        <thead>${head}</thead>
+        <tbody>${body}</tbody>
+      </table>
+    </div>
+    ${addMonthRow}`;
+}
+
+/* ---------- RIWAYAT PEMBAYARAN ---------- */
+function showRiwayat(memberId, memberName){
+  const months = Object.keys(state.kasData).sort();
+  let sudah = 0;
+  let rowsHtml;
+  if(months.length === 0){
+    rowsHtml = `<tr><td colspan="3" class="muted" style="text-align:center;">Belum ada catatan bulan apa pun</td></tr>`;
+  }else{
+    rowsHtml = months.map(mk=>{
+      const d = (state.kasData[mk]||{})[memberId] || {paid:false};
+      if(d.paid) sudah++;
+      return `<tr>
+        <td>${monthLabel(mk)}</td>
+        <td>${d.paid ? '✅ Sudah' : '⏳ Belum'}</td>
+        <td>${d.date ? formatDate(d.date) : '-'}</td>
+      </tr>`;
+    }).join('');
+  }
+  const bg = document.createElement('div');
+  bg.className = 'modal-bg';
+  bg.innerHTML = `
+    <div class="modal wide">
+      <h3>Riwayat Bayar — ${escapeHtml(memberName)}</h3>
+      <div class="history-summary">
+        <div class="chip">${sudah} Bulan Sudah Bayar</div>
+        <div class="chip">${months.length - sudah} Bulan Belum</div>
+      </div>
+      <table class="history-table">
+        <thead><tr><th>Bulan</th><th>Status</th><th>Tanggal</th></tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+      <div class="btn-row"><button class="btn secondary" id="closeRiwayatBtn">Tutup</button></div>
+    </div>`;
+  document.body.appendChild(bg);
+  document.getElementById('closeRiwayatBtn').onclick = () => bg.remove();
+  bg.onclick = (e) => { if(e.target === bg) bg.remove(); };
+}
+
+/* ---------- EKSPOR ---------- */
+function exportExcel(){
+  const members = state.config.members || [];
+  const monthData = state.kasData[selectedMonth] || {};
+  if(members.length === 0){ showToast('Belum ada data siswa'); return; }
+  const rows = members.map(m => {
+    const d = monthData[m.id] || {paid:false};
+    return {
+      "Nama Siswa": m.name,
+      "Status": d.paid ? "Sudah Bayar" : "Belum Bayar",
+      "Tanggal Bayar": d.date ? formatDate(d.date) : "-",
+      "Nominal": d.paid ? state.config.nominal : 0
+    };
+  });
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, monthLabel(selectedMonth).slice(0,31));
+  XLSX.writeFile(wb, `Rekap-Kas-${(state.config.className||'Kelas').replace(/\s+/g,'_')}-${selectedMonth}.xlsx`);
+  showToast('Rekap Excel diunduh');
+}
+
+function exportPDF(){
+  const members = state.config.members || [];
+  const monthData = state.kasData[selectedMonth] || {};
+  const paidCount = members.filter(m => monthData[m.id] && monthData[m.id].paid).length;
+  const total = paidCount * (state.config.nominal || 0);
+  const rowsHtml = members.map(m => {
+    const d = monthData[m.id] || {paid:false};
+    return `<tr><td>${escapeHtml(m.name)}</td><td>${d.paid ? 'Sudah Bayar' : 'Belum Bayar'}</td><td>${d.date ? formatDate(d.date) : '-'}</td></tr>`;
+  }).join('');
+  const area = document.getElementById('printArea');
+  area.innerHTML = `
+    <h2>${escapeHtml(state.config.className)} — Rekap Kas</h2>
+    <p>Bulan: ${monthLabel(selectedMonth)} &nbsp;•&nbsp; Kas per bulan: ${rupiah(state.config.nominal)}</p>
+    <p>Sudah bayar: ${paidCount} dari ${members.length} siswa &nbsp;•&nbsp; Total terkumpul: ${rupiah(total)}</p>
+    <table>
+      <thead><tr><th>Nama Siswa</th><th>Status</th><th>Tanggal Bayar</th></tr></thead>
+      <tbody>${rowsHtml || '<tr><td colspan="3">Belum ada data siswa</td></tr>'}</tbody>
+    </table>`;
+  window.print();
+}
+
+/* ---------- PENGUMUMAN TAB ---------- */
+function renderPengumuman(){
+  const list = [...state.pengumuman].sort((a,b)=> b.date.localeCompare(a.date));
+  let items = list.length === 0
+    ? `<div class="empty-state"><div class="big">Belum ada info 📭</div>${isAdmin?'Tulis info pertama di bawah.':'Nanti guru akan menulis info di sini.'}</div>`
+    : list.map(p => `
+      <div class="item-card">
+        <div class="item-title">${escapeHtml(p.title)}</div>
+        <div class="item-meta">${formatDate(p.date)}</div>
+        <div class="item-desc">${escapeHtml(p.body)}</div>
+        ${isAdmin ? `<div class="item-actions"><a class="del-item" data-list="pengumuman" data-id="${p.id}">hapus</a></div>` : ''}
+      </div>`).join('');
+
+  const form = isAdmin ? `
+    <div class="add-form">
+      <label class="field-label">Judul</label>
+      <div class="field"><input type="text" id="pengumumanTitle" placeholder="Judul info"></div>
+      <label class="field-label">Isi</label>
+      <div class="field"><textarea id="pengumumanBody" placeholder="Tulis info untuk orang tua/siswa…"></textarea></div>
+      <button class="btn" id="addPengumumanBtn">Bagikan Info</button>
+    </div>` : '';
+
+  return `<div class="card"><h2>Info Kelas</h2>${items}${form}</div>`;
+}
+
+/* ---------- AGENDA TAB ---------- */
+function renderCalendarGrid(mk, agendaList){
+  const [y, m] = mk.split('-').map(Number);
+  const firstDay = new Date(y, m-1, 1);
+  const daysInMonth = new Date(y, m, 0).getDate();
+  const startOffset = firstDay.getDay(); // 0 = Minggu
+  const todayStr = new Date().toISOString().slice(0,10);
+
+  const dayHeads = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'].map(d=>`<div class="cal-head">${d}</div>`).join('');
+
+  let cells = '';
+  for(let i=0;i<startOffset;i++){ cells += `<div class="cal-cell empty"></div>`; }
+  for(let day=1; day<=daysInMonth; day++){
+    const dateStr = `${mk}-${String(day).padStart(2,'0')}`;
+    const eventsToday = agendaList.filter(a => a.date === dateStr);
+    const hasEvent = eventsToday.length > 0;
+    const isToday = dateStr === todayStr;
+    const tags = eventsToday.slice(0,2).map(a => `<span class="evt-tag" title="${escapeHtml(a.title)}">${escapeHtml(a.title.slice(0,10))}${a.title.length>10?'…':''}</span>`).join('');
+    const more = eventsToday.length > 2 ? `<span class="evt-tag">+${eventsToday.length-2}</span>` : '';
+    cells += `<div class="cal-cell ${hasEvent?'has-event':''} ${isToday?'today':''}"><span class="daynum">${day}</span>${tags}${more}</div>`;
+  }
+
+  return `<div class="cal-grid">${dayHeads}${cells}</div>`;
+}
+
+function renderAgenda(){
+  const monthAgenda = state.agenda.filter(a => a.date && a.date.startsWith(selectedAgendaMonth));
+  const list = [...monthAgenda].sort((a,b)=> a.date.localeCompare(b.date));
+  const today = new Date().toISOString().slice(0,10);
+
+  const calendarHtml = renderCalendarGrid(selectedAgendaMonth, state.agenda);
+
+  let items = list.length === 0
+    ? `<div class="empty-state"><div class="big">Belum ada agenda bulan ini 🗓️</div>${isAdmin?'Tambahkan agenda di bawah.':'Belum ada jadwal kegiatan bulan ini.'}</div>`
+    : list.map(a => `
+      <div class="item-card ${a.date < today ? 'muted' : ''}">
+        <div class="item-title">${escapeHtml(a.title)}</div>
+        <div class="item-meta">${formatDate(a.date)}${a.time ? ' · ' + a.time : ''}</div>
+        ${a.desc ? `<div class="item-desc">${escapeHtml(a.desc)}</div>` : ''}
+        ${isAdmin ? `<div class="item-actions"><a class="del-item" data-list="agenda" data-id="${a.id}">hapus</a></div>` : ''}
+      </div>`).join('');
+
+  const form = isAdmin ? `
+    <div class="add-form">
+      <label class="field-label">Nama Kegiatan</label>
+      <div class="field"><input type="text" id="agendaTitle" placeholder="Contoh: Pentas Seni Kelas"></div>
+      <div style="display:flex; gap:10px;">
+        <div class="field" style="flex:1;"><label class="field-label">Tanggal</label><input type="date" id="agendaDate"></div>
+        <div class="field" style="flex:1;"><label class="field-label">Jam (opsional)</label><input type="time" id="agendaTime"></div>
+      </div>
+      <label class="field-label">Keterangan (opsional)</label>
+      <div class="field"><textarea id="agendaDesc" placeholder="Detail kegiatan…"></textarea></div>
+      <button class="btn" id="addAgendaBtn">Tambah Agenda</button>
+    </div>` : '';
+
+  return `<div class="card">
+      <h2>Kalender Kelas</h2>
+      <div class="month-nav">
+        <button id="prevMonthBtn">◀</button>
+        <div class="lbl">${monthLabel(selectedAgendaMonth)}</div>
+        <button id="nextMonthBtn">▶</button>
+      </div>
+      ${calendarHtml}
+      <h3 style="margin-bottom:6px;">Agenda &amp; Libur Bulan Ini</h3>
+      ${items}
+      ${form}
+    </div>`;
+}
+
+/* ---------- TUGAS TAB ---------- */
+function renderTugas(){
+  const allMapel = [...new Set((state.tugas||[]).map(t => (t.mapel||'').trim()).filter(Boolean))].sort();
+  if(!allMapel.includes(selectedMapel) && selectedMapel !== 'Semua') selectedMapel = 'Semua';
+
+  let list = [...state.tugas].sort((a,b)=>{
+    if(a.done !== b.done) return a.done ? 1 : -1;
+    return (a.deadline||'').localeCompare(b.deadline||'');
+  });
+  if(selectedMapel !== 'Semua'){
+    list = list.filter(t => (t.mapel||'').trim() === selectedMapel);
+  }
+
+  const filterHtml = allMapel.length > 0 ? `
+    <div class="filter-row">
+      <label class="field-label">Filter Mata Pelajaran</label>
+      <select id="mapelFilter">
+        <option value="Semua" ${selectedMapel==='Semua'?'selected':''}>Semua Mata Pelajaran</option>
+        ${allMapel.map(mp => `<option value="${escapeHtml(mp)}" ${mp===selectedMapel?'selected':''}>${escapeHtml(mp)}</option>`).join('')}
+      </select>
+    </div>` : '';
+
+  let items = list.length === 0
+    ? `<div class="empty-state"><div class="big">Belum ada tugas/PR 📚</div>${isAdmin?'Tambahkan tugas di bawah.':'Belum ada tugas yang dicatat.'}</div>`
+    : list.map(t => `
+      <div class="item-card ${t.done ? 'task-done' : ''}">
+        <div class="checkbox-row">
+          <input type="checkbox" class="task-check" data-id="${t.id}" ${t.done?'checked':''}>
+          <div style="flex:1;">
+            <div class="item-title">${escapeHtml(t.title)}</div>
+            <div class="item-meta">${t.mapel ? escapeHtml(t.mapel) + ' · ' : ''}Dikumpulkan: ${t.deadline ? formatDate(t.deadline) : '-'}</div>
+            ${t.desc ? `<div class="item-desc">${escapeHtml(t.desc)}</div>` : ''}
+            ${isAdmin ? `<div class="item-actions"><a class="del-item" data-list="tugas" data-id="${t.id}">hapus</a></div>` : ''}
+          </div>
+        </div>
+      </div>`).join('');
+
+  const form = isAdmin ? `
+    <div class="add-form">
+      <label class="field-label">Nama Tugas/PR</label>
+      <div class="field"><input type="text" id="tugasTitle" placeholder="Contoh: PR Matematika halaman 12"></div>
+      <div style="display:flex; gap:10px;">
+        <div class="field" style="flex:1;"><label class="field-label">Mata Pelajaran (opsional)</label><input type="text" id="tugasMapel" placeholder="Contoh: Matematika"></div>
+        <div class="field" style="flex:1;"><label class="field-label">Dikumpulkan</label><input type="date" id="tugasDeadline"></div>
+      </div>
+      <label class="field-label">Keterangan (opsional)</label>
+      <div class="field"><textarea id="tugasDesc" placeholder="Detail tugas…"></textarea></div>
+      <button class="btn" id="addTugasBtn">Tambah Tugas</button>
+    </div>` : '';
+
+  return `<div class="card"><h2>Tugas &amp; PR</h2>${filterHtml}${items}${form}</div>`;
+}
+
+function formatDate(dstr){
+  if(!dstr) return '-';
+  const d = new Date(dstr + 'T00:00:00');
+  if(isNaN(d)) return dstr;
+  return d.toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
+}
+
+/* ---------- EVENT BINDING PER TAB ---------- */
+function bindTabEvents(){
+  if(activeTab === 'kas'){
+    const sel = document.getElementById('monthSelect');
+    if(sel) sel.onchange = () => { selectedMonth = sel.value; render(); };
+
+    const viewBulananBtn = document.getElementById('viewBulananBtn');
+    if(viewBulananBtn) viewBulananBtn.onclick = () => { kasView = 'bulanan'; render(); };
+    const viewTabelBtn = document.getElementById('viewTabelBtn');
+    if(viewTabelBtn) viewTabelBtn.onclick = () => { kasView = 'tabel'; render(); };
+
+    document.querySelectorAll('.history-btn').forEach(btn=>{
+      btn.onclick = () => showRiwayat(btn.dataset.member, btn.dataset.name);
+    });
+    const exportExcelBtn = document.getElementById('exportExcelBtn');
+    if(exportExcelBtn) exportExcelBtn.onclick = exportExcel;
+    const exportPdfBtn = document.getElementById('exportPdfBtn');
+    if(exportPdfBtn) exportPdfBtn.onclick = exportPDF;
+
+    document.querySelectorAll('.toggle-pay').forEach(btn=>{
+      btn.onclick = async () => {
+        const mid = btn.dataset.member;
+        const md = state.kasData[selectedMonth] || {};
+        const cur = md[mid] || {paid:false};
+        const nowPaid = !cur.paid;
+        md[mid] = { paid: nowPaid, date: nowPaid ? new Date().toISOString().slice(0,10) : '', amount: nowPaid ? state.config.nominal : 0 };
+        state.kasData[selectedMonth] = md;
+        render();
+        await storageSet('kas-data', state.kasData);
+      };
+    });
+    document.querySelectorAll('.table-toggle').forEach(cb=>{
+      cb.onchange = async () => {
+        const mk = cb.dataset.month;
+        const mid = cb.dataset.member;
+        const md = state.kasData[mk] || {};
+        const nowPaid = cb.checked;
+        md[mid] = { paid: nowPaid, date: nowPaid ? new Date().toISOString().slice(0,10) : '', amount: nowPaid ? state.config.nominal : 0 };
+        state.kasData[mk] = md;
+        render();
+        await storageSet('kas-data', state.kasData);
+      };
+    });
+    const addMonthBtn = document.getElementById('addMonthBtn');
+    if(addMonthBtn) addMonthBtn.onclick = async () => {
+      const val = document.getElementById('newMonthInput').value;
+      if(!val){ showToast('Pilih bulan dulu'); return; }
+      if(!state.kasData[val]) state.kasData[val] = {};
+      selectedMonth = val;
+      render();
+      await storageSet('kas-data', state.kasData);
+      showToast('Kolom bulan ditambahkan');
+    };
+    const addExpenseBtn = document.getElementById('addExpenseBtn');
+    if(addExpenseBtn) addExpenseBtn.onclick = async () => {
+      const title = document.getElementById('expenseTitle').value.trim();
+      const amount = parseInt(document.getElementById('expenseAmount').value,10) || 0;
+      const date = document.getElementById('expenseDate').value || new Date().toISOString().slice(0,10);
+      if(!title || amount <= 0){ showToast('Nama dan jumlah pengeluaran wajib diisi'); return; }
+      state.pengeluaran.push({ id: uid(), title, amount, date });
+      render();
+      await storageSet('pengeluaran', state.pengeluaran);
+      showToast('Pengeluaran dicatat');
+    };
+    bindDelete('pengeluaran');
+    document.querySelectorAll('.del-member').forEach(a=>{
+      a.onclick = async () => {
+        if(!confirm('Hapus nama siswa ini?')) return;
+        state.config.members = state.config.members.filter(m => m.id !== a.dataset.id);
+        render();
+        await storageSet('config', state.config);
+      };
+    });
+    const saveCfg = document.getElementById('saveConfigBtn');
+    if(saveCfg) saveCfg.onclick = async () => {
+      state.config.className = document.getElementById('classNameInput').value.trim() || 'Kas Kelas';
+      state.config.nominal = parseInt(document.getElementById('nominalInput').value,10) || 0;
+      state.config.pin = document.getElementById('pinChangeInput').value.trim() || '1234';
+      await storageSet('config', state.config);
+      render();
+      showToast('Pengaturan disimpan');
+    };
+    const addMember = document.getElementById('addMemberBtn');
+    if(addMember) addMember.onclick = async () => {
+      const input = document.getElementById('newMemberName');
+      const name = input.value.trim();
+      if(!name) return;
+      state.config.members.push({ id: uid(), name });
+      input.value = '';
+      render();
+      await storageSet('config', state.config);
+    };
+    const resetBtn = document.getElementById('resetDataBtn');
+    if(resetBtn) resetBtn.onclick = async () => {
+      if(!confirm('Semua data kas, info, agenda, dan tugas akan dihapus permanen. Lanjutkan?')) return;
+      state.config = { className: state.config.className, nominal: state.config.nominal, pin: state.config.pin, members: [] };
+      state.kasData = {}; state.pengumuman = []; state.agenda = []; state.tugas = []; state.pengeluaran = [];
+      await Promise.all([
+        storageSet('config', state.config),
+        storageSet('kas-data', state.kasData),
+        storageSet('pengumuman', state.pengumuman),
+        storageSet('agenda', state.agenda),
+        storageSet('tugas', state.tugas),
+        storageSet('pengeluaran', state.pengeluaran)
+      ]);
+      render();
+      showToast('Data direset');
+    };
+  }
+
+  if(activeTab === 'pengumuman'){
+    const addBtn = document.getElementById('addPengumumanBtn');
+    if(addBtn) addBtn.onclick = async () => {
+      const title = document.getElementById('pengumumanTitle').value.trim();
+      const body = document.getElementById('pengumumanBody').value.trim();
+      if(!title || !body){ showToast('Judul dan isi wajib diisi'); return; }
+      state.pengumuman.push({ id: uid(), title, body, date: new Date().toISOString().slice(0,10) });
+      render();
+      await storageSet('pengumuman', state.pengumuman);
+      showToast('Info dibagikan');
+    };
+    bindDelete('pengumuman');
+  }
+
+  if(activeTab === 'agenda'){
+    const prevBtn = document.getElementById('prevMonthBtn');
+    if(prevBtn) prevBtn.onclick = () => { selectedAgendaMonth = shiftMonth(selectedAgendaMonth, -1); render(); };
+    const nextBtn = document.getElementById('nextMonthBtn');
+    if(nextBtn) nextBtn.onclick = () => { selectedAgendaMonth = shiftMonth(selectedAgendaMonth, 1); render(); };
+
+    const addBtn = document.getElementById('addAgendaBtn');
+    if(addBtn) addBtn.onclick = async () => {
+      const title = document.getElementById('agendaTitle').value.trim();
+      const date = document.getElementById('agendaDate').value;
+      const time = document.getElementById('agendaTime').value;
+      const desc = document.getElementById('agendaDesc').value.trim();
+      if(!title || !date){ showToast('Nama kegiatan dan tanggal wajib diisi'); return; }
+      state.agenda.push({ id: uid(), title, date, time, desc });
+      render();
+      await storageSet('agenda', state.agenda);
+      showToast('Agenda ditambahkan');
+    };
+    bindDelete('agenda');
+  }
+
+  if(activeTab === 'tugas'){
+    const mapelFilter = document.getElementById('mapelFilter');
+    if(mapelFilter) mapelFilter.onchange = () => { selectedMapel = mapelFilter.value; render(); };
+
+    const addBtn = document.getElementById('addTugasBtn');
+    if(addBtn) addBtn.onclick = async () => {
+      const title = document.getElementById('tugasTitle').value.trim();
+      const mapel = document.getElementById('tugasMapel').value.trim();
+      const deadline = document.getElementById('tugasDeadline').value;
+      const desc = document.getElementById('tugasDesc').value.trim();
+      if(!title){ showToast('Nama tugas wajib diisi'); return; }
+      state.tugas.push({ id: uid(), title, mapel, deadline, desc, done:false });
+      render();
+      await storageSet('tugas', state.tugas);
+      showToast('Tugas ditambahkan');
+    };
+    document.querySelectorAll('.task-check').forEach(cb=>{
+      cb.onchange = async () => {
+        const t = state.tugas.find(x=>x.id===cb.dataset.id);
+        if(t){ t.done = cb.checked; }
+        render();
+        await storageSet('tugas', state.tugas);
+      };
+    });
+    bindDelete('tugas');
+  }
+}
+
+function bindDelete(listName){
+  document.querySelectorAll('.del-item').forEach(a=>{
+    if(a.dataset.list !== listName) return;
+    a.onclick = async () => {
+      if(!confirm('Hapus item ini?')) return;
+      state[listName] = state[listName].filter(x => x.id !== a.dataset.id);
+      render();
+      await storageSet(listName, state[listName]);
+    };
+  });
+}
+
+/* ---------- INIT ---------- */
+(async function init(){
+  await loadAll();
+  updateModeBtn();
+  render();
+})();
+</script>
+</body>
+</html>
