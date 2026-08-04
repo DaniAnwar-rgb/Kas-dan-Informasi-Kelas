@@ -286,7 +286,22 @@
 <div id="toast" class="toast"></div>
 <div id="printArea"></div>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBeozaSKRQ2E5f5Ys8gYVGPnr1ze-geh8Y",
+  authDomain: "kas-dan-informasi-kelas.firebaseapp.com",
+  projectId: "kas-dan-informasi-kelas",
+  storageBucket: "kas-dan-informasi-kelas.firebasestorage.app",
+  messagingSenderId: "674217665922",
+  appId: "1:674217665922:web:d31277c4469c1b9af21b9b"
+};
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+const kelasDocRef = doc(db, "kelas", "data");
+
 const MONTH_NAMES = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 const MONTH_SHORT = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
 
@@ -326,17 +341,42 @@ function showToast(msg){
 
 async function storageGet(key, fallback){
   try{
-    const res = await window.storage.get(key, true);
-    if(!res || res.value === undefined) return fallback;
-    return JSON.parse(res.value);
-  }catch(e){ return fallback; }
+    const snap = await getDoc(kelasDocRef);
+    if(snap.exists() && snap.data()[key] !== undefined) return snap.data()[key];
+    return fallback;
+  }catch(e){
+    console.error(e);
+    return fallback;
+  }
 }
 async function storageSet(key, value){
   try{
-    const res = await window.storage.set(key, JSON.stringify(value), true);
-    if(!res){ showToast('Gagal menyimpan'); return false; }
+    await setDoc(kelasDocRef, { [key]: value }, { merge: true });
     return true;
-  }catch(e){ showToast('Gagal menyimpan'); return false; }
+  }catch(e){
+    console.error(e);
+    showToast('Gagal menyimpan (cek koneksi internet)');
+    return false;
+  }
+}
+
+let liveUpdateEnabled = false;
+function startLiveSync(){
+  onSnapshot(kelasDocRef, (snap) => {
+    if(!snap.exists()) return;
+    const data = snap.data();
+    if(data.config) state.config = data.config;
+    if(data['kas-data']) state.kasData = data['kas-data'];
+    if(data.pengumuman) state.pengumuman = data.pengumuman;
+    if(data.agenda) state.agenda = data.agenda;
+    if(data.tugas) state.tugas = data.tugas;
+    if(data.pengeluaran) state.pengeluaran = data.pengeluaran;
+    if(liveUpdateEnabled) render();
+    liveUpdateEnabled = true;
+  }, (err) => {
+    console.error(err);
+    showToast('Koneksi ke database terputus');
+  });
 }
 
 async function loadAll(){
@@ -1014,6 +1054,7 @@ function bindDelete(listName){
 /* ---------- INIT ---------- */
 (async function init(){
   await loadAll();
+  startLiveSync();
   updateModeBtn();
   render();
 })();
